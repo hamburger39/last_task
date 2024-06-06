@@ -1,5 +1,9 @@
+import Todo from './todo/page';
 
 export default function Home() {
-  return (<>TOP PAGE</>
+  return (
+    <div>
+      <Todo />
+    </div>
   );
 }
