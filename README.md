@@ -1,37 +1,58 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+## Todoリスト
 
-## Getting Started
+このTODOリストはNext.jsを使用して作成されました。Ant Designと
+Tailwind CSSでスタイルをあてています。
+このプロジェクトは、私の最後の練習作品です。
 
-First, run the development server:
+## 特徴
+- タスクの追加
+- ローカルストレージを使い再読み込みしたときのデータの消失を防いでいます
+- 確認モーダル付きの全削除機能
+- 編集と詳細テキストの機能
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 使用技術
+- Next.js
+- Typescript
+- Ant Design
+- Tailwind CSS
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+##　リストのインストールとセットアップ
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. リポジトリをクローンします。
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+    ```bash
+    git clone https://github.com/your-username/your-repo.git
+    ```
 
-## Learn More
+2. 依存関係をインストールします。
 
-To learn more about Next.js, take a look at the following resources:
+    ```bash
+    cd your-repo
+    npm install
+    ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+3. 開発サーバーを起動します。
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+    ```bash
+    npm run dev
+    ```
 
-## Deploy on Vercel
+    ブラウザで `http://localhost:3000` を開いてアプリケーションを確認します。
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## デプロイ
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
-# last_task
+Netlifyを使用してデプロイする手順は以下の通りです：
+
+1. [Netlify](https://www.netlify.com/)にアクセスし、アカウントを作成またはログインします。
+2. "New site from Git" ボタンをクリックし、GitHubアカウントを連携します。
+3. デプロイしたいリポジトリを選択します。
+4. ビルド設定を以下のように設定します：
+    - Build command: `npm run build`
+    - Publish directory: `.next`
+5. "Deploy site" ボタンをクリックします。
+
+デプロイが完了すると、Netlifyから公開URLが提供されます。
+
+## ライセンス
+
+このプロジェクトはMITライセンスの下で公開されています。詳細は[LICENSE](./LICENSE)ファイルを参照してください。
