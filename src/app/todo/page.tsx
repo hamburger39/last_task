@@ -3,17 +3,15 @@
 import { useEffect, useState, FC, SetStateAction } from "react";
 import CustomButton from "../components/CustomButton";
 import CustomModal from "../components/CustomModal";
-import CustomInput from "../components/CustomInput";
-import CustomTextArea from "../components/CustomTextArea";
+import TodoForm from "../components/TodoForm";
 
 interface TodoItem {
   value: string;
   detail: string;
+  reminder?: Date;
 }
 
 const Todo: FC = () => {
-  const [value, setValue] = useState<string>("");
-  const [detail, setDetail] = useState<string>("");
   const [todos, setTodos] = useState<TodoItem[]>([]);
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
@@ -24,18 +22,16 @@ const Todo: FC = () => {
     setTodos(todoList);
   }, []);
 
-  const handleSubmit = () => {
+  const handleSubmit = (todo: TodoItem) => {
     const updatedTodos = [...todos];
     if (editIndex !== null) {
-      updatedTodos[editIndex] = { value, detail };
+      updatedTodos[editIndex] = todo;
       setEditIndex(null);
     } else {
-      updatedTodos.push({ value, detail });
+      updatedTodos.push(todo);
     }
     setTodos(updatedTodos);
     localStorage.setItem("todos", JSON.stringify(updatedTodos));
-    setValue("");
-    setDetail("");
     setIsModalVisible(false);
   };
 
@@ -46,8 +42,6 @@ const Todo: FC = () => {
   };
 
   const handleEdit = (index: number) => {
-    setValue(todos[index].value);
-    setDetail(todos[index].detail);
     setEditIndex(index);
     setIsModalVisible(true);
   };
@@ -58,8 +52,6 @@ const Todo: FC = () => {
 
   const handleCancel = () => {
     setIsModalVisible(false);
-    setValue("");
-    setDetail("");
     setEditIndex(null);
   };
 
@@ -93,11 +85,10 @@ const Todo: FC = () => {
           </div>
         </div>
       ))}
-      <CustomModal title={editIndex !== null ? "編集" : "新規追加"} visible={isModalVisible} onOk={handleSubmit} onCancel={handleCancel}>
-        <CustomInput placeholder="タイトル" value={value} onChange={(e: { target: { value: SetStateAction<string>; }; }) => setValue(e.target.value)} className="mb-2" />
-        <CustomTextArea placeholder="詳細" value={detail} onChange={(e: { target: { value: SetStateAction<string>; }; }) => setDetail(e.target.value)} rows={4} />
+      <CustomModal title={editIndex !== null ? "編集" : "新規追加"} open={isModalVisible} onCancel={handleCancel}>
+        <TodoForm onSubmit={handleSubmit} editTodo={editIndex !== null ? todos[editIndex] : undefined} />
       </CustomModal>
-      <CustomModal title="全削除確認" visible={isDeleteAllModalVisible} onOk={handleDeleteAll} onCancel={handleCancelDeleteAll}>
+      <CustomModal title="全削除確認" open={isDeleteAllModalVisible} onOk={handleDeleteAll} onCancel={handleCancelDeleteAll}>
         <p>本当に全てのTODOを削除しますか？</p>
       </CustomModal>
     </div>
