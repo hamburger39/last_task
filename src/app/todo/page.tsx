@@ -3,15 +3,19 @@
 import { useEffect, useState, FC, SetStateAction } from "react";
 import CustomButton from "../components/CustomButton";
 import CustomModal from "../components/CustomModal";
-import TodoForm from "../components/TodoForm";
+import CustomInput from "../components/CustomInput";
+import CustomTextArea from "../components/CustomTextArea";
 
 interface TodoItem {
   value: string;
   detail: string;
-  reminder?: Date;
+  reminderTime?: string; // リマインダー時間のフィールドを追加
 }
 
 const Todo: FC = () => {
+  const [value, setValue] = useState<string>("");
+  const [detail, setDetail] = useState<string>("");
+  const [reminderTime, setReminderTime] = useState<string>(""); // リマインダー時間を保存する状態を追加
   const [todos, setTodos] = useState<TodoItem[]>([]);
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
@@ -22,17 +26,37 @@ const Todo: FC = () => {
     setTodos(todoList);
   }, []);
 
-  const handleSubmit = (todo: TodoItem) => {
+  useEffect(() => {
+    if (Notification.permission !== "granted") {
+      Notification.requestPermission();
+    }
+  }, []);
+
+  const handleSubmit = () => {
     const updatedTodos = [...todos];
+    const newTodo = { value, detail, reminderTime };
     if (editIndex !== null) {
-      updatedTodos[editIndex] = todo;
+      updatedTodos[editIndex] = newTodo;
       setEditIndex(null);
     } else {
-      updatedTodos.push(todo);
+      updatedTodos.push(newTodo);
     }
     setTodos(updatedTodos);
     localStorage.setItem("todos", JSON.stringify(updatedTodos));
+    setValue("");
+    setDetail("");
+    setReminderTime("");
     setIsModalVisible(false);
+
+    if (reminderTime) {
+      const reminderDate = new Date(reminderTime);
+      const timeUntilReminder = reminderDate.getTime() - new Date().getTime();
+      if (timeUntilReminder > 0) {
+        setTimeout(() => {
+          new Notification("リマインダー", { body: `TODO: ${value}` });
+        }, timeUntilReminder);
+      }
+    }
   };
 
   const handleDelete = (index: number) => {
@@ -42,6 +66,9 @@ const Todo: FC = () => {
   };
 
   const handleEdit = (index: number) => {
+    setValue(todos[index].value);
+    setDetail(todos[index].detail);
+    setReminderTime(todos[index].reminderTime || "");
     setEditIndex(index);
     setIsModalVisible(true);
   };
@@ -52,6 +79,9 @@ const Todo: FC = () => {
 
   const handleCancel = () => {
     setIsModalVisible(false);
+    setValue("");
+    setDetail("");
+    setReminderTime("");
     setEditIndex(null);
   };
 
@@ -79,16 +109,19 @@ const Todo: FC = () => {
         <div className="flex flex-col border rounded-xl border-dominant shadow p-3 mt-3 justify-between" key={index}>
           <h2 className="text-lg text-dominant">{todo.value}</h2>
           <p className="text-sm text-gray-700">{todo.detail}</p>
+          <p className="text-xs text-gray-500">{todo.reminderTime}</p>
           <div className="flex space-x-2 mt-2">
             <CustomButton type="primary" onClick={() => handleEdit(index)}>編集</CustomButton>
             <CustomButton type="default" danger onClick={() => handleDelete(index)}>削除</CustomButton>
           </div>
         </div>
       ))}
-      <CustomModal title={editIndex !== null ? "編集" : "新規追加"} open={isModalVisible} onCancel={handleCancel}>
-        <TodoForm onSubmit={handleSubmit} editTodo={editIndex !== null ? todos[editIndex] : undefined} />
+      <CustomModal title={editIndex !== null ? "編集" : "新規追加"} visible={isModalVisible} onOk={handleSubmit} onCancel={handleCancel}>
+        <CustomInput placeholder="タイトル" value={value} onChange={(e: { target: { value: SetStateAction<string>; }; }) => setValue(e.target.value)} className="mb-2" />
+        <CustomTextArea placeholder="詳細" value={detail} onChange={(e: { target: { value: SetStateAction<string>; }; }) => setDetail(e.target.value)} rows={4} />
+        <CustomInput placeholder="リマインダー時間 (YYYY-MM-DD HH:MM)" value={reminderTime} onChange={(e: { target: { value: SetStateAction<string>; }; }) => setReminderTime(e.target.value)} className="mb-2" />
       </CustomModal>
-      <CustomModal title="全削除確認" open={isDeleteAllModalVisible} onOk={handleDeleteAll} onCancel={handleCancelDeleteAll}>
+      <CustomModal title="全削除確認" visible={isDeleteAllModalVisible} onOk={handleDeleteAll} onCancel={handleCancelDeleteAll}>
         <p>本当に全てのTODOを削除しますか？</p>
       </CustomModal>
     </div>
