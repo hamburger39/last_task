@@ -1,6 +1,15 @@
 import { Input } from "antd";
-import { TextAreaProps } from "antd/es/input/TextArea";
+import { TextAreaProps } from "antd/lib/input";
 
-const CustomTextArea: React.FC<TextAreaProps> = (props) => <Input.TextArea {...props} />;
+const { TextArea } = Input;
+
+interface CustomTextAreaProps extends TextAreaProps {
+  rows: number;
+}
+
+const CustomTextArea: React.FC<CustomTextAreaProps> = (props) => {
+  return <TextArea {...props} />;
+};
 
 export default CustomTextArea;
+
