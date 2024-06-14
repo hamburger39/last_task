@@ -1,4 +1,9 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {};
+import withAntdLess from 'next-plugin-antd-less';
 
-export default nextConfig;
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  reactStrictMode: true,
+  // 他のNext.jsの設定
+};
+
+export default withAntdLess(nextConfig);

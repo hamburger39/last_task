@@ -1,5 +1,16 @@
 import { Button, ButtonProps } from "antd";
+import { FC } from "react";
 
-const CustomButton: React.FC<ButtonProps> = (props) => <Button {...props} />;
+interface CustomButtonProps extends ButtonProps {
+  icon?: React.ReactNode;
+}
+
+const CustomButton: FC<CustomButtonProps> = ({ children, icon, ...props }) => {
+  return (
+    <Button {...props} icon={icon}>
+      {children}
+    </Button>
+  );
+};
 
 export default CustomButton;
