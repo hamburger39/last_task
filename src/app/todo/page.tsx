@@ -67,21 +67,6 @@ const Todo: FC = () => {
     setReminderTime(undefined);
     setPriority('中');
     setIsModalVisible(false);
-
-    if (sendEmail && reminderTime) {
-      const reminderDate = new Date(reminderTime);
-      const timeUntilReminder = reminderDate.getTime() - new Date().getTime();
-      if (timeUntilReminder > 0) {
-        setTimeout(() => {
-          new Notification('リマインダー', { body: `TODO: ${value}` });
-          const email = localStorage.getItem('email');
-          if (email) {
-            // メール送信処理
-            // メール送信が成功したら通知を表示するなどの処理を実装する
-          }
-        }, timeUntilReminder);
-      }
-    }
   };
 
   const handleDelete = (index: number) => {
@@ -217,9 +202,6 @@ const Todo: FC = () => {
           <Option value="中">中</Option>
           <Option value="低">低</Option>
         </Select>
-        <div className="mt-2">
-          <CustomCheckbox checked={sendEmail} onChange={(e) => setSendEmail(e.target.checked)}>リマインダーをメールで送信</CustomCheckbox>
-        </div>
       </CustomModal>
       <CustomModal title="全削除の確認" visible={isDeleteAllModalVisible} onOk={handleDeleteAll} onCancel={handleCancelDeleteAll}>
         <p>本当に全てのToDoを削除しますか？</p>
@@ -228,13 +210,13 @@ const Todo: FC = () => {
         <CustomInput placeholder="ファイル名" value={fileName} onChange={(e) => setFileName(e.target.value)} />
         <CustomButton type="default" onClick={handleExport}>Export</CustomButton>
         <Upload 
-  accept=".xlsx, .xls" 
-  showUploadList={false} 
-  beforeUpload={(file) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const data = e.target?.result;
-      if (data) {
+              accept=".xlsx, .xls" 
+              showUploadList={false} 
+              beforeUpload={(file) => {
+              const reader = new FileReader();
+              reader.onload = (e) => {
+              const data = e.target?.result;
+        if (data) {
         const workbook = XLSX.read(data, { type: 'binary' });
         const firstSheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[firstSheetName];
@@ -245,7 +227,7 @@ const Todo: FC = () => {
       }
     };
     reader.readAsBinaryString(file);
-    return false; // falseを返すことで自動的なアップロードを無効化
+    return false; 
   }}
 >
   <CustomButton type="default">Import</CustomButton>
