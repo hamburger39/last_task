@@ -1,3 +1,4 @@
+// src/app/todo/page.tsx
 'use client';
 import React, { FC, useEffect, useState } from 'react';
 import { DatePicker, Select, Upload, message } from 'antd';
@@ -7,16 +8,9 @@ import CustomButton from '../components/CustomButton';
 import CustomModal from '../components/CustomModal';
 import CustomInput from '../components/CustomInput';
 import CustomTextArea from '../components/CustomTextArea';
+import { validateExcelFormat, TodoItem } from '../../utils/validateExcelFormat';
 
 const { Option } = Select;
-
-interface TodoItem {
-  value: string;
-  detail: string;
-  reminderTime?: string;
-  priority: string;
-  createdAt: string;
-}
 
 const Todo: FC = () => {
   const [value, setValue] = useState<string>('');
@@ -138,23 +132,6 @@ const Todo: FC = () => {
       message.error('ファイル名を入力してください');
       return;
     }
-    const handleUpload = async (info: any) => {
-      try {
-        const file = info.file.originFileObj;
-        const data = await file.arrayBuffer();
-        const workbook = XLSX.read(data);
-        const firstSheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[firstSheetName];
-        const jsonData = XLSX.utils.sheet_to_json<TodoItem>(worksheet);
-        setTodos(jsonData);
-        localStorage.setItem('todos', JSON.stringify(jsonData));
-        message.success(`${info.file.name} ファイルの読み込みが成功しました`);
-      } catch (error) {
-        message.error('ファイルの読み込みに失敗しました。フォーマットが正しいかどうかご確認ください。');
-        throw new Error('ファイルの読み込みに失敗しました。');
-      }
-    };
-    
 
     const ws = XLSX.utils.json_to_sheet(todos);
     const wb = XLSX.utils.book_new();
@@ -164,15 +141,27 @@ const Todo: FC = () => {
   };
 
   const handleUpload = async (info: any) => {
-    const file = info.file.originFileObj;
-    const data = await file.arrayBuffer();
-    const workbook = XLSX.read(data);
-    const firstSheetName = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[firstSheetName];
-    const jsonData = XLSX.utils.sheet_to_json<TodoItem>(worksheet);
-    setTodos(jsonData);
-    localStorage.setItem('todos', JSON.stringify(jsonData));
-    message.success(`${info.file.name} ファイルの読み込みが成功しました`);
+    try {
+      const file = info.file.originFileObj;
+      const data = await file.arrayBuffer();
+      const workbook = XLSX.read(data);
+      const firstSheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[firstSheetName];
+      const jsonData = XLSX.utils.sheet_to_json<TodoItem>(worksheet);
+
+      // Validate the data format
+      validateExcelFormat(jsonData);
+
+      setTodos(jsonData);
+      localStorage.setItem('todos', JSON.stringify(jsonData));
+      message.success(`${info.file.name} ファイルの読み込みが成功しました`);
+    } catch (error) {
+      if (error instanceof Error) {
+        message.error('ファイルの読み込みに失敗しました: ' + error.message);
+      } else {
+        message.error('ファイルの読み込みに失敗しました。');
+      }
+    }
   };
 
   return (
@@ -202,55 +191,29 @@ const Todo: FC = () => {
           </div>
         </div>
       ))}
-      <CustomModal title={editIndex !== null ? "編集" : "新規追加"} open={isModalVisible} onOk={handleSubmit} onCancel={handleCancel}>
-        <CustomInput placeholder="タイトル" value={value} onChange={(e) => setValue(e.target.value)} className="mb-2" />
-        <CustomTextArea placeholder="詳細" value={detail} onChange={(e) => setDetail(e.target.value)} rows={4} />
-        <DatePicker
-          showTime
-          placeholder="リマインダー"
-          value={reminderTime ? moment(reminderTime) : null}
-          onChange={(value) => setReminderTime(value ? value.toISOString() : undefined)}
-          className="w-full mt-2"
-        />
-        <Select defaultValue="中" value={priority} onChange={(value) => setPriority(value)} className="w-full mt-2">
+      <CustomModal title={editIndex !== null ? "編集" : "新規追加"} visible={isModalVisible} onOk={handleSubmit} onCancel={handleCancel}>
+        <CustomInput placeholder="タイトル" value={value} onChange={(e) => setValue(e.target.value)} />
+        <CustomTextArea placeholder="詳細" value={detail} onChange={(e) => setDetail(e.target.value)} rows={0} />
+        <DatePicker showTime value={reminderTime ? moment(reminderTime) : null} onChange={(date) => setReminderTime(date?.toISOString())} />
+        <Select value={priority} onChange={(value) => setPriority(value)} className="w-full mt-2">
           <Option value="高">高</Option>
           <Option value="中">中</Option>
           <Option value="低">低</Option>
         </Select>
       </CustomModal>
-      <CustomModal title="全削除の確認" open={isDeleteAllModalVisible} onOk={handleDeleteAll} onCancel={handleCancelDeleteAll}>
-        <p>本当に全てのToDoを削除しますか？</p>
+      <CustomModal title="全削除確認" visible={isDeleteAllModalVisible} onOk={handleDeleteAll} onCancel={handleCancelDeleteAll}>
+        <p>本当に全てのタスクを削除しますか？</p>
       </CustomModal>
-      <div className="flex mt-4 space-x-4">
-        <CustomInput placeholder="ファイル名" value={fileName} onChange={(e) => setFileName(e.target.value)} />
-        <CustomButton type="default" onClick={handleExport}>Export</CustomButton>
-        <Upload 
-              accept=".xlsx, .xls" 
-              showUploadList={false} 
-              beforeUpload={(file) => {
-              const reader = new FileReader();
-              reader.onload = (e) => {
-              const data = e.target?.result;
-        if (data) {
-        const workbook = XLSX.read(data, { type: 'binary' });
-        const firstSheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[firstSheetName];
-        const jsonData = XLSX.utils.sheet_to_json<TodoItem>(worksheet);
-        setTodos(jsonData);
-        localStorage.setItem('todos', JSON.stringify(jsonData));
-        message.success(`${file.name} ファイルの読み込みが成功しました`);
-      }
-    };
-    reader.readAsBinaryString(file);
-    return false; 
-  }}
->
-  <CustomButton type="default">Import</CustomButton>
-</Upload>
-
+      <div className="flex space-x-4 mt-4">
+        <CustomInput placeholder="ファイル名を入力" value={fileName} onChange={(e) => setFileName(e.target.value)} />
+        <CustomButton type="primary" onClick={handleExport}>Export</CustomButton>
+        <Upload showUploadList={false} beforeUpload={() => false} onChange={handleUpload}>
+          <CustomButton type="primary">Import</CustomButton>
+        </Upload>
       </div>
     </div>
   );
 };
 
 export default Todo;
+
