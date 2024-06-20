@@ -7,7 +7,6 @@ import CustomButton from '../components/CustomButton';
 import CustomModal from '../components/CustomModal';
 import CustomInput from '../components/CustomInput';
 import CustomTextArea from '../components/CustomTextArea';
-import CustomCheckbox from '../components/CustomCheckbox';
 
 const { Option } = Select;
 
@@ -29,7 +28,6 @@ const Todo: FC = () => {
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [isDeleteAllModalVisible, setIsDeleteAllModalVisible] = useState<boolean>(false);
   const [sortType, setSortType] = useState<string>('priorityAsc');
-  const [sendEmail, setSendEmail] = useState<boolean>(false);
   const [fileName, setFileName] = useState<string>('');
 
   useEffect(() => {
@@ -140,6 +138,23 @@ const Todo: FC = () => {
       message.error('ファイル名を入力してください');
       return;
     }
+    const handleUpload = async (info: any) => {
+      try {
+        const file = info.file.originFileObj;
+        const data = await file.arrayBuffer();
+        const workbook = XLSX.read(data);
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        const jsonData = XLSX.utils.sheet_to_json<TodoItem>(worksheet);
+        setTodos(jsonData);
+        localStorage.setItem('todos', JSON.stringify(jsonData));
+        message.success(`${info.file.name} ファイルの読み込みが成功しました`);
+      } catch (error) {
+        message.error('ファイルの読み込みに失敗しました。フォーマットが正しいかどうかご確認ください。');
+        throw new Error('ファイルの読み込みに失敗しました。');
+      }
+    };
+    
 
     const ws = XLSX.utils.json_to_sheet(todos);
     const wb = XLSX.utils.book_new();
@@ -187,7 +202,7 @@ const Todo: FC = () => {
           </div>
         </div>
       ))}
-      <CustomModal title={editIndex !== null ? "編集" : "新規追加"} visible={isModalVisible} onOk={handleSubmit} onCancel={handleCancel}>
+      <CustomModal title={editIndex !== null ? "編集" : "新規追加"} open={isModalVisible} onOk={handleSubmit} onCancel={handleCancel}>
         <CustomInput placeholder="タイトル" value={value} onChange={(e) => setValue(e.target.value)} className="mb-2" />
         <CustomTextArea placeholder="詳細" value={detail} onChange={(e) => setDetail(e.target.value)} rows={4} />
         <DatePicker
@@ -203,7 +218,7 @@ const Todo: FC = () => {
           <Option value="低">低</Option>
         </Select>
       </CustomModal>
-      <CustomModal title="全削除の確認" visible={isDeleteAllModalVisible} onOk={handleDeleteAll} onCancel={handleCancelDeleteAll}>
+      <CustomModal title="全削除の確認" open={isDeleteAllModalVisible} onOk={handleDeleteAll} onCancel={handleCancelDeleteAll}>
         <p>本当に全てのToDoを削除しますか？</p>
       </CustomModal>
       <div className="flex mt-4 space-x-4">
