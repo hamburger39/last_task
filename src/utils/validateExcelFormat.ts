@@ -1,4 +1,3 @@
-// src/app/utils/validateExcelFormat.ts
 export interface TodoItem {
   value: string;
   detail: string;
@@ -7,22 +6,28 @@ export interface TodoItem {
   createdAt: string;
 }
 
-export const validateExcelFormat = (jsonData: TodoItem[]): void => {
-  jsonData.forEach((item, index) => {
-    if (typeof item.value !== 'string') {
-      throw new Error(`Invalid data type for 'value' in row ${index + 1}`);
-    }
-    if (typeof item.detail !== 'string') {
-      throw new Error(`Invalid data type for 'detail' in row ${index + 1}`);
-    }
-    if (item.reminderTime && isNaN(Date.parse(item.reminderTime))) {
-      throw new Error(`Invalid data type for 'reminderTime' in row ${index + 1}`);
-    }
-    if (!['高', '中', '低'].includes(item.priority)) {
-      throw new Error(`Invalid value for 'priority' in row ${index + 1}`);
-    }
-    if (isNaN(Date.parse(item.createdAt))) {
-      throw new Error(`Invalid data type for 'createdAt' in row ${index + 1}`);
-    }
+export const validateExcelFormat = (jsonData: any[]): jsonData is TodoItem[] => {
+  console.log('Validating JSON data:', jsonData);
+
+  if (!Array.isArray(jsonData)) {
+    console.error('Data is not an array');
+    return false;
+  }
+
+  const isValid = jsonData.every((item) => {
+    const hasValidFields =
+      typeof item.value === 'string' &&
+      typeof item.detail === 'string' &&
+      (typeof item.reminderTime === 'string' || item.reminderTime === undefined) &&
+      typeof item.priority === 'string' &&
+      typeof item.createdAt === 'string';
+      
+    console.log('Validating item:', item, 'Is valid:', hasValidFields);
+    return hasValidFields;
   });
+
+  console.log('Validation result:', isValid);
+  return isValid;
 };
+
+

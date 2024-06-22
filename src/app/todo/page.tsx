@@ -1,4 +1,3 @@
-// src/app/todo/page.tsx
 'use client';
 import React, { FC, useEffect, useState } from 'react';
 import { DatePicker, Select, Upload, message } from 'antd';
@@ -142,19 +141,36 @@ const Todo: FC = () => {
 
   const handleUpload = async (info: any) => {
     try {
-      const file = info.file.originFileObj;
-      const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data);
-      const firstSheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[firstSheetName];
-      const jsonData = XLSX.utils.sheet_to_json<TodoItem>(worksheet);
-
-      // Validate the data format
-      validateExcelFormat(jsonData);
-
-      setTodos(jsonData);
-      localStorage.setItem('todos', JSON.stringify(jsonData));
-      message.success(`${info.file.name} ファイルの読み込みが成功しました`);
+      const { file } = info;
+      if (!file) {
+        throw new Error('Uploaded file is undefined');
+      }
+  
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        if (event.target) {
+          const data = event.target.result;
+          if (data === null) {
+            throw new Error('Uploaded file is null');
+          }
+          const arrayBuffer = data instanceof ArrayBuffer ? data : new TextEncoder().encode(data).buffer;
+          const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array' });
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
+          const jsonData = XLSX.utils.sheet_to_json(worksheet);
+          
+          console.log('Read data from Excel file:', jsonData);
+  
+          if (!validateExcelFormat(jsonData)) {
+            throw new Error('Excelファイルの形式が正しくありません');
+          }
+  
+          setTodos(jsonData);
+          localStorage.setItem('todos', JSON.stringify(jsonData));
+          message.success(`${info.file.name} ファイルの読み込みが成功しました`);
+        }
+      };
+      reader.readAsArrayBuffer(file);
     } catch (error) {
       if (error instanceof Error) {
         message.error('ファイルの読み込みに失敗しました: ' + error.message);
@@ -163,6 +179,7 @@ const Todo: FC = () => {
       }
     }
   };
+  
 
   return (
     <div className="p-4 max-w-md mx-auto">
@@ -184,35 +201,50 @@ const Todo: FC = () => {
           <p className="text-sm text-gray-700">{todo.detail}</p>
           <p className="text-xs text-gray-500">{todo.reminderTime}</p>
           <p className="text-xs text-gray-500">{todo.priority}</p>
-          <p className="text-xs text-gray-500">{new Date(todo.createdAt).toLocaleString()}</p>
-          <div className="flex space-x-2 mt-2">
+          <p className="text-xs text-gray-500">{todo.createdAt}</p>
+          <div className="flex mt-2 space-x-4">
             <CustomButton type="primary" onClick={() => handleEdit(index)}>編集</CustomButton>
             <CustomButton type="default" danger onClick={() => handleDelete(index)}>削除</CustomButton>
           </div>
         </div>
       ))}
-      <CustomModal title={editIndex !== null ? "編集" : "新規追加"} visible={isModalVisible} onOk={handleSubmit} onCancel={handleCancel}>
+      <CustomModal
+        title={editIndex !== null ? "TODOを編集" : "新規TODOを追加"}
+        visible={isModalVisible}
+        onOk={handleSubmit}
+        onCancel={handleCancel}
+      >
         <CustomInput placeholder="タイトル" value={value} onChange={(e) => setValue(e.target.value)} />
-        <CustomTextArea placeholder="詳細" value={detail} onChange={(e) => setDetail(e.target.value)} rows={0} />
-        <DatePicker showTime value={reminderTime ? moment(reminderTime) : null} onChange={(date) => setReminderTime(date?.toISOString())} />
-        <Select value={priority} onChange={(value) => setPriority(value)} className="w-full mt-2">
-          <Option value="高">高</Option>
-          <Option value="中">中</Option>
-          <Option value="低">低</Option>
-        </Select>
-      </CustomModal>
-      <CustomModal title="全削除確認" visible={isDeleteAllModalVisible} onOk={handleDeleteAll} onCancel={handleCancelDeleteAll}>
-        <p>本当に全てのタスクを削除しますか？</p>
-      </CustomModal>
-      <div className="flex space-x-4 mt-4">
-        <CustomInput placeholder="ファイル名を入力" value={fileName} onChange={(e) => setFileName(e.target.value)} />
-        <CustomButton type="primary" onClick={handleExport}>Export</CustomButton>
-        <Upload showUploadList={false} beforeUpload={() => false} onChange={handleUpload}>
-          <CustomButton type="primary">Import</CustomButton>
-        </Upload>
-      </div>
+        <CustomTextArea placeholder="詳細" value={detail} onChange={(e) => setDetail(e.target.value)} rows={4} />
+        <DatePicker
+          showTime
+          format="YYYY-MM-DD HH:mm:ss"
+          value={reminderTime ? moment(reminderTime) : null}
+          onChange={(date, dateString) => setReminderTime(dateString as string)}
+        />
+        <Select defaultValue={priority} onChange={(value) => setPriority(value)} className="w-full mt-2">
+        <Option value="高">高</Option>
+        <Option value="中">中</Option>
+        <Option value="低">低</Option>
+      </Select>
+    </CustomModal>
+    <CustomModal
+      title="全てのTODOを削除"
+      visible={isDeleteAllModalVisible}
+      onOk={handleDeleteAll}
+      onCancel={handleCancelDeleteAll}
+    >
+      <p>全てのTODOを削除しますか？</p>
+    </CustomModal>
+    <div className="flex mt-4 space-x-4">
+      <Upload beforeUpload={() => false} onChange={handleUpload}>
+        <CustomButton type="default">Import</CustomButton>
+      </Upload>
+      <CustomInput placeholder="ファイル名" value={fileName} onChange={(e) => setFileName(e.target.value)} />
+      <CustomButton type="default" onClick={handleExport}>Export</CustomButton>
     </div>
-  );
+  </div>
+);
 };
 
 export default Todo;

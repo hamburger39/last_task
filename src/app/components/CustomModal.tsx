@@ -6,5 +6,3 @@ const CustomModal: React.FC<ModalProps> = (props) => {
 
 export default CustomModal;
 
-
-
