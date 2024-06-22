@@ -154,20 +154,29 @@ const Todo: FC = () => {
             throw new Error('Uploaded file is null');
           }
           const arrayBuffer = data instanceof ArrayBuffer ? data : new TextEncoder().encode(data).buffer;
-          const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array' });
-          const firstSheetName = workbook.SheetNames[0];
-          const worksheet = workbook.Sheets[firstSheetName];
-          const jsonData = XLSX.utils.sheet_to_json(worksheet);
-          
-          console.log('Read data from Excel file:', jsonData);
   
-          if (!validateExcelFormat(jsonData)) {
-            throw new Error('Excelファイルの形式が正しくありません');
+          try {
+            const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array' });
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+            const jsonData = XLSX.utils.sheet_to_json(worksheet);
+  
+            console.log('Read data from Excel file:', jsonData);
+  
+            if (!validateExcelFormat(jsonData)) {
+              throw new Error('Excelファイルの形式が正しくありません');
+            }
+  
+            setTodos(jsonData);
+            localStorage.setItem('todos', JSON.stringify(jsonData));
+            message.success(`${info.file.name} ファイルの読み込みが成功しました`);
+          } catch (error) {
+            if (error instanceof Error) {
+              message.error('Excelファイルの読み込みに失敗しました: ' + error.message);
+            } else {
+              message.error('Excelファイルの読み込みに失敗しました。');
+            }
           }
-  
-          setTodos(jsonData);
-          localStorage.setItem('todos', JSON.stringify(jsonData));
-          message.success(`${info.file.name} ファイルの読み込みが成功しました`);
         }
       };
       reader.readAsArrayBuffer(file);
