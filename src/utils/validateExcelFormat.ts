@@ -6,7 +6,7 @@ export interface TodoItem {
   createdAt: string;
 }
 
-export const validateExcelFormat = (jsonData: any[]): jsonData is TodoItem[] => {
+export const validateExcelFormat = (jsonData: unknown[]): jsonData is TodoItem[] => {
   console.log('Validating JSON data:', jsonData);
 
   if (!Array.isArray(jsonData)) {
@@ -15,12 +15,14 @@ export const validateExcelFormat = (jsonData: any[]): jsonData is TodoItem[] => 
   }
 
   const isValid = jsonData.every((item) => {
+    if (typeof item !== 'object' || item === null) return false;
+
     const hasValidFields =
-      typeof item.value === 'string' &&
-      typeof item.detail === 'string' &&
-      (typeof item.reminderTime === 'string' || item.reminderTime === undefined) &&
-      typeof item.priority === 'string' &&
-      typeof item.createdAt === 'string';
+      typeof (item as TodoItem).value === 'string' &&
+      typeof (item as TodoItem).detail === 'string' &&
+      (typeof (item as TodoItem).reminderTime === 'string' || (item as TodoItem).reminderTime === undefined) &&
+      typeof (item as TodoItem).priority === 'string' &&
+      typeof (item as TodoItem).createdAt === 'string';
       
     console.log('Validating item:', item, 'Is valid:', hasValidFields);
     return hasValidFields;
@@ -29,5 +31,4 @@ export const validateExcelFormat = (jsonData: any[]): jsonData is TodoItem[] => 
   console.log('Validation result:', isValid);
   return isValid;
 };
-
 

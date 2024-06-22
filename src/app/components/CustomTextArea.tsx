@@ -1,14 +1,17 @@
-import { Input } from "antd";
-import { TextAreaProps } from "antd/lib/input";
+import React, { FC } from 'react';
+import { Input } from 'antd';
 
 const { TextArea } = Input;
 
-interface CustomTextAreaProps extends TextAreaProps {
-  rows: number;
+interface CustomTextAreaProps {
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  placeholder?: string;
+  rows?: number;
 }
 
-const CustomTextArea: React.FC<CustomTextAreaProps> = (props) => {
-  return <TextArea {...props} />;
+const CustomTextArea: FC<CustomTextAreaProps> = ({ value, onChange, placeholder, rows }) => {
+  return <TextArea value={value} onChange={onChange} placeholder={placeholder} rows={rows} />;
 };
 
 export default CustomTextArea;
