@@ -1,7 +1,15 @@
-import { Input, InputProps } from "antd";
+import React, { FC } from 'react';
+import { Input } from 'antd';
 
-const CustomInput: React.FC<InputProps> = (props) => {
-  return <Input {...props} />;
+interface CustomInputProps {
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  placeholder?: string;
+}
+
+const CustomInput: FC<CustomInputProps> = ({ value, onChange, placeholder }) => {
+  return <Input value={value} onChange={onChange} placeholder={placeholder} />;
 };
 
 export default CustomInput;
+
