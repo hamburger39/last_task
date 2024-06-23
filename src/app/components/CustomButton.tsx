@@ -5,15 +5,18 @@ interface CustomButtonProps {
   type: 'primary' | 'default' | 'link' | 'text' | 'dashed';
   onClick: () => void;
   danger?: boolean;
+  disabled?: boolean; 
   children: React.ReactNode;
+  className?: string;
 }
 
-const CustomButton: FC<CustomButtonProps> = ({ type, onClick, danger = false, children }) => {
+const CustomButton: FC<CustomButtonProps> = ({ type, onClick, danger = false, disabled = false, children, className }) => {
   return (
-    <Button type={type} onClick={onClick} danger={danger}>
+    <Button type={type} onClick={onClick} danger={danger} disabled={disabled} className={className}>
       {children}
     </Button>
   );
 };
 
 export default CustomButton;
+
