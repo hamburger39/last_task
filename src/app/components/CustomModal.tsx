@@ -21,5 +21,3 @@ const CustomModal: FC<CustomModalProps> = ({ title, open, onOk, onCancel, childr
 };
 
 export default CustomModal;
-
-
