@@ -4,15 +4,18 @@ import { Input } from 'antd';
 const { TextArea } = Input;
 
 interface CustomTextAreaProps {
+  placeholder?: string;
   value: string;
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
-  placeholder?: string;
-  rows?: number;
+  className?: string;
 }
 
-const CustomTextArea: FC<CustomTextAreaProps> = ({ value, onChange, placeholder, rows }) => {
-  return <TextArea value={value} onChange={onChange} placeholder={placeholder} rows={rows} />;
+const CustomTextArea: FC<CustomTextAreaProps> = ({ placeholder, value, onChange, className }) => {
+  return (
+    <TextArea placeholder={placeholder} value={value} onChange={onChange} className={className} />
+  );
 };
 
 export default CustomTextArea;
+
 

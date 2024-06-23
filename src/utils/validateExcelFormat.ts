@@ -2,33 +2,20 @@ export interface TodoItem {
   value: string;
   detail: string;
   reminderTime?: string;
-  priority: string;
+  priority: '高' | '中' | '低';
   createdAt: string;
 }
 
 export const validateExcelFormat = (jsonData: unknown[]): jsonData is TodoItem[] => {
-  console.log('Validating JSON data:', jsonData);
-
-  if (!Array.isArray(jsonData)) {
-    console.error('Data is not an array');
-    return false;
-  }
-
-  const isValid = jsonData.every((item) => {
+  if (!Array.isArray(jsonData)) return false;
+  for (const item of jsonData) {
     if (typeof item !== 'object' || item === null) return false;
-
-    const hasValidFields =
-      typeof (item as TodoItem).value === 'string' &&
-      typeof (item as TodoItem).detail === 'string' &&
-      (typeof (item as TodoItem).reminderTime === 'string' || (item as TodoItem).reminderTime === undefined) &&
-      typeof (item as TodoItem).priority === 'string' &&
-      typeof (item as TodoItem).createdAt === 'string';
-      
-    console.log('Validating item:', item, 'Is valid:', hasValidFields);
-    return hasValidFields;
-  });
-
-  console.log('Validation result:', isValid);
-  return isValid;
+    const { value, detail, reminderTime, priority, createdAt } = item as TodoItem;
+    if (typeof value !== 'string' || typeof detail !== 'string') return false;
+    if (reminderTime && typeof reminderTime !== 'string') return false;
+    if (priority !== '高' && priority !== '中' && priority !== '低') return false;
+    if (typeof createdAt !== 'string') return false;
+  }
+  return true;
 };
 
