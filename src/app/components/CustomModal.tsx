@@ -12,7 +12,7 @@ interface CustomModalProps {
   okButtonProps?: { [key: string]: any };
 }
 
-const CustomModal: FC<CustomModalProps> = ({ title, open, onOk, onCancel, children, okText = 'OK', cancelText = 'キャンセル', okButtonProps }) => {
+const CustomModal: FC<CustomModalProps> = ({ title, open, onOk, onCancel, children, okText = '承認', cancelText = 'キャンセル', okButtonProps }) => {
   return (
     <Modal title={title} open={open} onOk={onOk} onCancel={onCancel} okText={okText} cancelText={cancelText} okButtonProps={okButtonProps}>
       {children}
