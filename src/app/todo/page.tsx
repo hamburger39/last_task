@@ -18,6 +18,11 @@ const priorityOrder = { '高': 1, '中': 2, '低': 3 } as const;
 type PriorityOrder = keyof typeof priorityOrder;
 type SortType = 'priorityAsc' | 'priorityDesc' | 'createdAtAsc' | 'createdAtDesc';
 
+const toJST = (isoString: string) => {
+  const date = new Date(isoString);
+  return date.toLocaleString('ja-JP');
+};
+
 const Todo: FC = () => {
   const [value, setValue] = useState<string>('');
   const [detail, setDetail] = useState<string>('');
@@ -40,6 +45,11 @@ const Todo: FC = () => {
       Notification.requestPermission();
     }
   }, []);
+
+  const toJST = (isoString: string) => {
+    const date = new Date(isoString);
+    return date.toLocaleString('ja-JP');
+  };
 
   const handleSubmit = () => {
     const updatedTodos = [...todos];
@@ -210,7 +220,7 @@ const Todo: FC = () => {
           <p className="text-xs text-gray-700">{todo.detail}</p>
           <p className="text-xs text-gray-500">{todo.reminderTime}</p>
           <p className="text-xs text-gray-500">{todo.priority}</p>
-          <p className="text-xs text-gray-500">{new Date(todo.createdAt).toLocaleString()}</p>
+          <p className="text-xs text-gray-500">{toJST(todo.createdAt)}</p>
           <div className="flex mt-2 space-x-4">
             <CustomButton type="primary" onClick={() => handleEdit(index)}>編集</CustomButton>
             <CustomButton type="default" danger onClick={() => handleDelete(index)}>削除</CustomButton>
@@ -222,62 +232,63 @@ const Todo: FC = () => {
         open={isModalOpen}
         onOk={handleSubmit}
         onCancel={handleCancel}
-      >
-        <CustomInput 
-          placeholder="タイトル" 
-          value={value} 
-          onChange={(e) => setValue(e.target.value)} 
-          required
-          className="mb-4"
-        />
-        <CustomTextArea 
-          placeholder="詳細" 
-          value={detail} 
-          onChange={(e) => setDetail(e.target.value)} 
-          className="mb-4"
-        />
-        <DatePicker
-          showTime
-          placeholder="リマインダー時間を選択"
-          value={reminderTime ? moment(reminderTime) : null}
-          onChange={(value) => setReminderTime(value ? value.toISOString() : undefined)}
-          className="mb-4 w-full"
-        />
-        <Select
-          defaultValue="中"
-          value={priority}
-          onChange={(value: PriorityOrder) => setPriority(value)}
-          className="w-full"
+        okButtonProps={{ disabled: !value.trim() }}
         >
-          <Option value="高">高</Option>
-          <Option value="中">中</Option>
-          <Option value="低">低</Option>
-        </Select>
-      </CustomModal>
-      <CustomModal
-        title="全削除の確認"
-        open={isDeleteAllModalOpen}
-        onOk={handleDeleteAll}
-        onCancel={handleCancelDeleteAll}
-        okText="承認"
-        cancelText="キャンセル"
-      >
-        <p>すべてのTODOを削除しますか？</p>
-      </CustomModal>
-      <div className="flex mb-4 space-x-4">
-        <CustomButton type="primary" onClick={handleExport} className="mt-4">エクスポート</CustomButton>
-        <Upload
-          accept=".xlsx, .xlsm"
-          showUploadList={false}
-          customRequest={handleUpload}
-          className="mt-4"
+          <CustomInput 
+            placeholder="タイトル" 
+            value={value} 
+            onChange={(e) => setValue(e.target.value)} 
+            required
+            className="mb-4"
+          />
+          <CustomTextArea 
+            placeholder="詳細" 
+            value={detail} 
+            onChange={(e) => setDetail(e.target.value)} 
+            className="mb-4"
+          />
+          <DatePicker
+            showTime
+            placeholder="リマインダー時間を選択"
+            value={reminderTime ? moment(reminderTime) : null}
+            onChange={(value) => setReminderTime(value ? value.toISOString() : undefined)}
+            className="mb-4 w-full"
+          />
+          <Select
+            defaultValue="中"
+            value={priority}
+            onChange={(value: PriorityOrder) => setPriority(value)}
+            className="w-full"
+          >
+            <Option value="高">高</Option>
+            <Option value="中">中</Option>
+            <Option value="低">低</Option>
+          </Select>
+        </CustomModal>
+        <CustomModal
+          title="全削除の確認"
+          open={isDeleteAllModalOpen}
+          onOk={handleDeleteAll}
+          onCancel={handleCancelDeleteAll}
+          okText="承認"
+          cancelText="キャンセル"
         >
-          <CustomButton type="default" onClick={() => {}}>インポート</CustomButton>
-        </Upload>
+          <p>すべてのTODOを削除しますか？</p>
+        </CustomModal>
+        <div className="flex mb-4 space-x-4">
+          <CustomButton type="primary" onClick={handleExport} className="mt-4">エクスポート</CustomButton>
+          <Upload
+            accept=".xlsx, .xlsm"
+            showUploadList={false}
+            customRequest={handleUpload}
+            className="mt-4"
+          >
+            <CustomButton type="default" onClick={() => {}}>インポート</CustomButton>
+          </Upload>
+        </div>
       </div>
-    </div>
-  );
-};
-
-export default Todo;
-
+    );
+  };
+  
+  export default Todo;
+  

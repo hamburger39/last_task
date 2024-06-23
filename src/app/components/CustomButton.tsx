@@ -1,11 +1,11 @@
 import React, { FC } from 'react';
-import { Button } from 'antd';
+import { Button, ButtonProps } from 'antd';
 
 interface CustomButtonProps {
   type: 'primary' | 'default' | 'link' | 'text' | 'dashed';
   onClick: () => void;
   danger?: boolean;
-  disabled?: boolean; 
+  disabled?: boolean;
   children: React.ReactNode;
   className?: string;
 }
@@ -19,4 +19,5 @@ const CustomButton: FC<CustomButtonProps> = ({ type, onClick, danger = false, di
 };
 
 export default CustomButton;
+
 
