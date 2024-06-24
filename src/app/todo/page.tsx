@@ -219,7 +219,7 @@ const Todo: FC = () => {
   };
 
   return (
-    <div className="grid place-items-center">
+    <div className="px-4 py-8">
       <div className="flex justify-between items-center mb-6">
         <div className="flex">
           <CustomButton type="primary" onClick={showModal} className="mr-2">新規追加</CustomButton>
@@ -247,7 +247,7 @@ const Todo: FC = () => {
       ))}
       <div className="flex justify-between mt-4">
         <Upload customRequest={handleUpload} accept=".xlsx,.xlsm" fileList={[]}>
-          <CustomButton type="default" className='mr-20'>インポート</CustomButton>
+          <CustomButton type="default" >インポート</CustomButton>
         </Upload>
         <CustomButton type="primary" onClick={showExportModal} disabled={todos.length === 0}>エクスポート</CustomButton>
       </div>
@@ -282,5 +282,3 @@ const Todo: FC = () => {
 };
 
 export default Todo;
-
-
