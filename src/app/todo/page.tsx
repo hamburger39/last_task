@@ -219,16 +219,16 @@ const Todo: FC = () => {
   };
 
   return (
-    <div className="p-4 max-w-md mx-auto">
-      <div className="flex justify-between mb-4">
-        <Select value={sortType} onChange={handleSortChange} className="w-1/3">
+    <div className="p-4 max-w-md mx-auto sm:p-6 lg:p-8">
+      <div className="flex justify-between mb-4 flex-col sm:flex-row">
+        <Select value={sortType} onChange={handleSortChange} className="w-full sm:w-1/3 mb-4 sm:mb-0">
           <Option value="priorityAsc">優先度 昇順</Option>
           <Option value="priorityDesc">優先度 降順</Option>
           <Option value="createdAtAsc">作成日時 昇順</Option>
           <Option value="createdAtDesc">作成日時 降順</Option>
         </Select>
-        <CustomButton type="primary" onClick={showModal}>新規追加</CustomButton>
-        <CustomButton type="default" danger onClick={showDeleteAllModal}disabled={todos.length === 0}>全削除</CustomButton>
+        <CustomButton type="primary" onClick={showModal} className="w-full sm:w-auto mb-4 sm:mb-0">新規追加</CustomButton>
+        <CustomButton type="default" danger onClick={showDeleteAllModal} disabled={todos.length === 0} className="w-full sm:w-auto">全削除</CustomButton>
       </div>
       {sortedTodos.map((todo, index) => (
         <div className="bg-white p-4 rounded shadow mb-4" key={index}>
