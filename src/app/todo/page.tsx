@@ -238,7 +238,7 @@ const Todo: FC = () => {
           <p className="text-xs">{todo.detail}</p>
           <p className="text-xs">{todo.reminderTime ? toJST(todo.reminderTime) : ''}</p>
           <p className="text-xs text-gray-400">{toJST(todo.createdAt)}</p>
-          <p className="text-xs text-gray-500">{todo.priority}</p>
+          <p className="text-xs text-gray-500 mt-2">{todo.priority}</p>
           <div className="flex justify-end space-x-2 mt-2">
             <CustomButton type="primary" onClick={() => handleEdit(index)}>編集</CustomButton>
             <CustomButton type="default" danger onClick={() => handleDelete(index)}>削除</CustomButton>
@@ -246,7 +246,7 @@ const Todo: FC = () => {
         </div>
       ))}
       <div className="flex justify-between mt-4">
-        <Upload customRequest={handleUpload} accept=".xlsx,.xlsm">
+        <Upload customRequest={handleUpload} accept=".xlsx,.xlsm"showUploadList={false}>
           <CustomButton type="default">インポート</CustomButton>
         </Upload>
         <CustomButton type="primary" onClick={showExportModal} disabled={todos.length === 0}>エクスポート</CustomButton>
@@ -259,6 +259,7 @@ const Todo: FC = () => {
           value={reminderTime ? moment(reminderTime) : null}
           onChange={(date) => setReminderTime(date ? date.toISOString() : undefined)}
           placeholder="リマインダーの時間"
+          style={{width:"100%"}}
         />
         <Select value={priority} onChange={(value) => setPriority(value as PriorityOrder)} className="w-full">
           <Option value="高">高</Option>
