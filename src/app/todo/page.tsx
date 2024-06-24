@@ -220,7 +220,6 @@ const Todo: FC = () => {
 
   return (
     <div className="p-4 max-w-md mx-auto">
-      <h1 className="text-xl font-bold mb-4">TODOリスト</h1>
       <div className="flex justify-between mb-4">
         <Select value={sortType} onChange={handleSortChange} className="w-1/3">
           <Option value="priorityAsc">優先度 昇順</Option>
@@ -229,7 +228,7 @@ const Todo: FC = () => {
           <Option value="createdAtDesc">作成日時 降順</Option>
         </Select>
         <CustomButton type="primary" onClick={showModal}>新規追加</CustomButton>
-        <CustomButton type="default" danger onClick={showDeleteAllModal}>全削除</CustomButton>
+        <CustomButton type="default" danger onClick={showDeleteAllModal}disabled={todos.length === 0}>全削除</CustomButton>
       </div>
       {sortedTodos.map((todo, index) => (
         <div className="bg-white p-4 rounded shadow mb-4" key={index}>
@@ -250,7 +249,8 @@ const Todo: FC = () => {
         </Upload>
         <CustomButton type="primary" onClick={showExportModal} disabled={todos.length === 0}>エクスポート</CustomButton>
       </div>
-      <CustomModal title={editIndex !== null ? "編集" : "新規追加"} open={isModalOpen} onOk={handleSubmit} onCancel={handleCancel} okButtonProps={{ disabled: !value.trim() }}>
+      <CustomModal title={editIndex !== null ? "編集" : "新規追加"} open={isModalOpen} onOk={handleSubmit} onCancel={handleCancel} okButtonProps={{ disabled: !value.trim() }} okText="承認"
+        cancelText="キャンセル">
         {editIndex !== null && <p className="text-base font-medium mb-2"></p>}
         <CustomInput className="mb-4" value={value} onChange={(e) => setValue(e.target.value)} placeholder="タイトル" />
         <CustomTextArea className="mb-4" value={detail} onChange={(e) => setDetail(e.target.value)} placeholder="詳細" />
@@ -259,7 +259,7 @@ const Todo: FC = () => {
           value={reminderTime ? moment(reminderTime) : null}
           onChange={(date) => setReminderTime(date ? date.toISOString() : undefined)}
           placeholder="リマインダーの時間"
-          className="mb-4"
+          className="w-full mb-4"
         />
         <Select value={priority} onChange={(value) => setPriority(value as PriorityOrder)} className="w-full mb-4">
           <Option value="高">高</Option>
@@ -267,10 +267,12 @@ const Todo: FC = () => {
           <Option value="低">低</Option>
         </Select>
       </CustomModal>
-      <CustomModal title="全削除の確認" open={isDeleteAllModalOpen} onOk={handleDeleteAll} onCancel={handleCancelDeleteAll}>
-        <p>本当に全てのTODOを削除しますか？</ p>
+      <CustomModal title="全削除の確認" open={isDeleteAllModalOpen} onOk={handleDeleteAll} onCancel={handleCancelDeleteAll} okText="承認"
+        cancelText="キャンセル">
+        <p>本当に全てのTODOを削除しますか？</p>
       </CustomModal>
-      <Modal title="エクスポートファイル名の入力" open={isExportModalOpen} onOk={handleExport} onCancel={() => setIsExportModalOpen(false)}>
+      <Modal title="エクスポートファイル名の入力" open={isExportModalOpen} onOk={handleExport} onCancel={() => setIsExportModalOpen(false)} okText="承認"
+        cancelText="キャンセル">
         <AntInput value={fileName} onChange={(e) => setFileName(e.target.value)} placeholder="ファイル名を入力" />
       </Modal>
     </div>
