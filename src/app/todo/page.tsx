@@ -251,7 +251,7 @@ const Todo: FC = () => {
         <CustomButton type="primary" onClick={showExportModal} disabled={todos.length === 0}>エクスポート</CustomButton>
       </div>
       <CustomModal title={editIndex !== null ? "編集" : "新規追加"} open={isModalOpen} onOk={handleSubmit} onCancel={handleCancel} okButtonProps={{ disabled: !value.trim() }}>
-        {editIndex !== null && <p className="text-base font-medium mb-2">編集</p>}
+        {editIndex !== null && <p className="text-base font-medium mb-2"></p>}
         <CustomInput className="mb-4" value={value} onChange={(e) => setValue(e.target.value)} placeholder="タイトル" />
         <CustomTextArea className="mb-4" value={detail} onChange={(e) => setDetail(e.target.value)} placeholder="詳細" />
         <DatePicker
