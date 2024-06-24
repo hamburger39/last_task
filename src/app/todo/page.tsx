@@ -134,7 +134,7 @@ const Todo: FC = () => {
     XLSX.utils.book_append_sheet(wb, ws, 'Todos');
     const exportFileName = fileName + '.xlsx';
     XLSX.writeFile(wb, exportFileName);
-    setFileName('');  // Reset file name after export
+    setFileName('');  
     setIsExportModalOpen(false);
   };
 
