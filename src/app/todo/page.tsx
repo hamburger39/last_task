@@ -271,7 +271,7 @@ const Todo: FC = () => {
       <CustomModal title="全削除の確認" open={isDeleteAllModalOpen} onOk={handleDeleteAll} onCancel={handleCancelDeleteAll}>
         <p>本当に全てのTODOを削除しますか？</p>
       </CustomModal>
-      <Modal title="エクスポートファイル名の入力" open={isExportModalOpen} onOk={handleExport} onCancel={() => setIsExportModalOpen(false)}>
+      <Modal title="エクスポートファイル名の入力" open={isExportModalOpen} onOk={handleExport} onCancel={() => setIsExportModalOpen(false)} okText="承認" cancelText="キャンセル">
         <AntInput value={fileName} onChange={(e) => setFileName(e.target.value)} placeholder="ファイル名を入力" />
       </Modal>
     </div>
