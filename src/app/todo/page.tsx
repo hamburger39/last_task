@@ -219,13 +219,11 @@ const Todo: FC = () => {
   };
 
   return (
-    <div className="px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
-        <div className="flex">
-          <CustomButton type="primary" onClick={showModal} className="mr-2">新規追加</CustomButton>
-          <CustomButton type="default" danger onClick={showDeleteAllModal} disabled={todos.length === 0} className='mr-2'>全削除</CustomButton>
-        </div>
-        <Select value={sortType} onChange={handleSortChange} className="w-1/2">
+    <div className="px-4 py-8 flex flex-col">
+      <div className="flex items-center mb-6">
+          <CustomButton type="primary" onClick={showModal} className="mr-2 p-2">新規追加</CustomButton>
+          <CustomButton type="default" danger onClick={showDeleteAllModal} disabled={todos.length === 0} className='mr-2 p-2'>全削除</CustomButton>
+        <Select value={sortType} onChange={handleSortChange}>
           <Option value="priorityAsc">優先度 昇順</Option>
           <Option value="priorityDesc">優先度 降順</Option>
           <Option value="createdAtAsc">作成日時 昇順</Option>
