@@ -219,11 +219,11 @@ const Todo: FC = () => {
   };
 
   return (
-    <div className="p-4 max-w-md mx-auto">
-      <div className="flex justify-between items-center mb-4">
+    <div className="grid place-items-center">
+      <div className="flex justify-between items-center mb-6">
         <div className="flex">
           <CustomButton type="primary" onClick={showModal} className="mr-2">新規追加</CustomButton>
-          <CustomButton type="default" danger onClick={showDeleteAllModal} disabled={todos.length === 0}>全削除</CustomButton>
+          <CustomButton type="default" danger onClick={showDeleteAllModal} disabled={todos.length === 0} className='mr-2'>全削除</CustomButton>
         </div>
         <Select value={sortType} onChange={handleSortChange} className="w-1/2">
           <Option value="priorityAsc">優先度 昇順</Option>
@@ -247,13 +247,12 @@ const Todo: FC = () => {
       ))}
       <div className="flex justify-between mt-4">
         <Upload customRequest={handleUpload} accept=".xlsx,.xlsm" fileList={[]}>
-          <CustomButton type="default">インポート</CustomButton>
+          <CustomButton type="default" className='mr-20'>インポート</CustomButton>
         </Upload>
         <CustomButton type="primary" onClick={showExportModal} disabled={todos.length === 0}>エクスポート</CustomButton>
       </div>
       <CustomModal title={editIndex !== null ? "編集" : "新規追加"} open={isModalOpen} onOk={handleSubmit} onCancel={handleCancel} okButtonProps={{ disabled: !value.trim() }} okText="承認"
         cancelText="キャンセル">
-        {editIndex !== null && <p className="text-base font-medium mb-2"></p>}
         <CustomInput className="mb-4" value={value} onChange={(e) => setValue(e.target.value)} placeholder="タイトル" />
         <CustomTextArea className="mb-4" value={detail} onChange={(e) => setDetail(e.target.value)} placeholder="詳細" />
         <DatePicker
