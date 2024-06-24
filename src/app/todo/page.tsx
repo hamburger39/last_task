@@ -1,9 +1,8 @@
 'use client';
 import React, { FC, useEffect, useState } from 'react';
-import { DatePicker, Select, Upload, message } from 'antd';
-import { UploadChangeParam, UploadFile } from 'antd/es/upload/interface';
-import { UploadRequestOption } from 'rc-upload/lib/interface'; 
-import { RcFile, UploadProps } from 'antd/es/upload';
+import { DatePicker, Select, Upload, message, Modal, Input as AntInput } from 'antd';
+import { UploadRequestOption } from 'rc-upload/lib/interface';
+import { RcFile } from 'antd/es/upload';
 import moment from 'moment';
 import * as XLSX from 'xlsx';
 import CustomButton from '../components/CustomButton';
@@ -32,6 +31,7 @@ const Todo: FC = () => {
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isDeleteAllModalOpen, setIsDeleteAllModalOpen] = useState<boolean>(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false);
   const [sortType, setSortType] = useState<SortType>('priorityAsc');
   const [fileName, setFileName] = useState<string>('');
 
@@ -46,12 +46,12 @@ const Todo: FC = () => {
     }
   }, []);
 
-  const toJST = (isoString: string) => {
-    const date = new Date(isoString);
-    return date.toLocaleString('ja-JP');
-  };
-
   const handleSubmit = () => {
+    if (!value.trim()) {
+      message.error('タイトルは必須です');
+      return;
+    }
+
     const updatedTodos = [...todos];
     const newTodo: TodoItem = {
       value,
@@ -120,6 +120,24 @@ const Todo: FC = () => {
     setIsDeleteAllModalOpen(false);
   };
 
+  const showExportModal = () => {
+    if (todos.length === 0) {
+      message.warning('エクスポートするTODOがありません');
+      return;
+    }
+    setIsExportModalOpen(true);
+  };
+
+  const handleExport = () => {
+    const ws = XLSX.utils.json_to_sheet(todos);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Todos');
+    const exportFileName = fileName + '.xlsx';
+    XLSX.writeFile(wb, exportFileName);
+    setFileName('');  // Reset file name after export
+    setIsExportModalOpen(false);
+  };
+
   const sortedTodos = todos.sort((a, b) => {
     if (sortType === 'priorityAsc') {
       if (priorityOrder[a.priority] !== priorityOrder[b.priority]) {
@@ -141,22 +159,17 @@ const Todo: FC = () => {
     setSortType(sortType);
   };
 
-  const handleExport = () => {
-    const ws = XLSX.utils.json_to_sheet(todos);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Todos');
-    const exportFileName = fileName + '.xlsx';
-    XLSX.writeFile(wb, exportFileName);
-    setFileName('');  // Reset file name after export
-  };
-
   const handleUpload = async (options: UploadRequestOption) => {
     const { file } = options;
     try {
       if (!file) {
         throw new Error('ファイルが見つかりません');
       }
-  
+      if (!/\.xlsx$|\.xlsm$/.test((file as RcFile).name)) {
+        message.error('対応しているファイル形式は .xlsx, .xlsm のみです');
+        return;
+      }
+
       const reader = new FileReader();
       reader.onload = async (event) => {
         try {
@@ -165,20 +178,25 @@ const Todo: FC = () => {
             throw new Error('ファイルの読み込みに失敗しました');
           }
           const arrayBuffer = data instanceof ArrayBuffer ? data : new TextEncoder().encode(data).buffer;
-  
+
           const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array' });
           const firstSheetName = workbook.SheetNames[0];
           const worksheet = workbook.Sheets[firstSheetName];
           const jsonData = XLSX.utils.sheet_to_json(worksheet);
-  
+
           if (!validateExcelFormat(jsonData)) {
             throw new Error('Excelファイルの形式が正しくありません');
           }
-  
+
           if (todos.length > 0 && !window.confirm('既存のTODOを上書きしますか？')) {
             return;
           }
-  
+
+          if (jsonData.length === 0) {
+            message.warning('インポートしたファイルにはTODOがありません');
+            return;
+          }
+
           setTodos(jsonData);
           localStorage.setItem('todos', JSON.stringify(jsonData));
           message.success(`${(file as RcFile).name} ファイルの読み込みが成功しました`);
@@ -215,80 +233,47 @@ const Todo: FC = () => {
         </Select>
       </div>
       {sortedTodos.map((todo, index) => (
-        <div className="flex flex-col border rounded-xl border-dominant shadow p-3 mt-3 justify-between" key={index}>
-          <h2 className="text-lg text-dominant font-bold">{todo.value}</h2>
-          <p className="text-xs text-gray-700">{todo.detail}</p>
-          <p className="text-xs text-gray-500">{todo.reminderTime}</p>
+        <div className="flex flex-col border rounded-xl border-dominant shadow p-4 mb-4" key={index}>
+          <p className="text-sm font-bold">{todo.value}</p>
+          <p className="text-xs">{todo.detail}</p>
+          <p className="text-xs">{todo.reminderTime ? toJST(todo.reminderTime) : ''}</p>
+          <p className="text-xs text-gray-400">{toJST(todo.createdAt)}</p>
           <p className="text-xs text-gray-500">{todo.priority}</p>
-          <p className="text-xs text-gray-500">{toJST(todo.createdAt)}</p>
-          <div className="flex mt-2 space-x-4">
+          <div className="flex justify-end space-x-2 mt-2">
             <CustomButton type="primary" onClick={() => handleEdit(index)}>編集</CustomButton>
             <CustomButton type="default" danger onClick={() => handleDelete(index)}>削除</CustomButton>
           </div>
         </div>
       ))}
-      <CustomModal
-        title={editIndex !== null ? "TODOを編集" : "新規TODOを追加"}
-        open={isModalOpen}
-        onOk={handleSubmit}
-        onCancel={handleCancel}
-        okButtonProps={{ disabled: !value.trim() }}
-        >
-          <CustomInput 
-            placeholder="タイトル" 
-            value={value} 
-            onChange={(e) => setValue(e.target.value)} 
-            required
-            className="mb-4"
-          />
-          <CustomTextArea 
-            placeholder="詳細" 
-            value={detail} 
-            onChange={(e) => setDetail(e.target.value)} 
-            className="mb-4"
-          />
-          <DatePicker
-            showTime
-            placeholder="リマインダー時間を選択"
-            value={reminderTime ? moment(reminderTime) : null}
-            onChange={(value) => setReminderTime(value ? value.toISOString() : undefined)}
-            className="mb-4 w-full"
-          />
-          <Select
-            defaultValue="中"
-            value={priority}
-            onChange={(value: PriorityOrder) => setPriority(value)}
-            className="w-full"
-          >
-            <Option value="高">高</Option>
-            <Option value="中">中</Option>
-            <Option value="低">低</Option>
-          </Select>
-        </CustomModal>
-        <CustomModal
-          title="全削除の確認"
-          open={isDeleteAllModalOpen}
-          onOk={handleDeleteAll}
-          onCancel={handleCancelDeleteAll}
-          okText="承認"
-          cancelText="キャンセル"
-        >
-          <p>すべてのTODOを削除しますか？</p>
-        </CustomModal>
-        <div className="flex mb-4 space-x-4">
-          <CustomButton type="primary" onClick={handleExport} className="mt-4">エクスポート</CustomButton>
-          <Upload
-            accept=".xlsx, .xlsm"
-            showUploadList={false}
-            customRequest={handleUpload}
-            className="mt-4"
-          >
-            <CustomButton type="default" onClick={() => {}}>インポート</CustomButton>
-          </Upload>
-        </div>
+      <div className="flex justify-between mt-4">
+        <Upload customRequest={handleUpload} accept=".xlsx,.xlsm">
+          <CustomButton type="default">インポート</CustomButton>
+        </Upload>
+        <CustomButton type="primary" onClick={showExportModal} disabled={todos.length === 0}>エクスポート</CustomButton>
       </div>
-    );
-  };
-  
-  export default Todo;
-  
+      <CustomModal title="新規追加" open={isModalOpen} onOk={handleSubmit} onCancel={handleCancel} okButtonProps={{ disabled: !value.trim() }}>
+        <CustomInput value={value} onChange={(e) => setValue(e.target.value)} placeholder="タイトル" />
+        <CustomTextArea value={detail} onChange={(e) => setDetail(e.target.value)} placeholder="詳細" />
+        <DatePicker
+          showTime
+          value={reminderTime ? moment(reminderTime) : null}
+          onChange={(date) => setReminderTime(date ? date.toISOString() : undefined)}
+          placeholder="リマインダーの時間"
+        />
+        <Select value={priority} onChange={(value) => setPriority(value as PriorityOrder)} className="w-full">
+          <Option value="高">高</Option>
+          <Option value="中">中</Option>
+          <Option value="低">低</Option>
+        </Select>
+      </CustomModal>
+      <CustomModal title="全削除の確認" open={isDeleteAllModalOpen} onOk={handleDeleteAll} onCancel={handleCancelDeleteAll}>
+        <p>本当に全てのTODOを削除しますか？</p>
+      </CustomModal>
+      <Modal title="エクスポートファイル名の入力" open={isExportModalOpen} onOk={handleExport} onCancel={() => setIsExportModalOpen(false)}>
+        <AntInput value={fileName} onChange={(e) => setFileName(e.target.value)} placeholder="ファイル名を入力" />
+      </Modal>
+    </div>
+  );
+};
+
+export default Todo;

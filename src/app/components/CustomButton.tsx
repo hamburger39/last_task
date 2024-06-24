@@ -1,21 +1,10 @@
-import React, { FC } from 'react';
+import React from 'react';
 import { Button, ButtonProps } from 'antd';
 
-interface CustomButtonProps {
-  type: 'primary' | 'default' | 'link' | 'text' | 'dashed';
-  onClick: () => void;
-  danger?: boolean;
-  disabled?: boolean;
-  children: React.ReactNode;
-  className?: string;
-}
+interface CustomButtonProps extends ButtonProps {}
 
-const CustomButton: FC<CustomButtonProps> = ({ type, onClick, danger = false, disabled = false, children, className }) => {
-  return (
-    <Button type={type} onClick={onClick} danger={danger} disabled={disabled} className={className}>
-      {children}
-    </Button>
-  );
+const CustomButton: React.FC<CustomButtonProps> = ({ children, ...props }) => {
+  return <Button {...props}>{children}</Button>;
 };
 
 export default CustomButton;
