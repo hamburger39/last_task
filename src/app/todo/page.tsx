@@ -246,9 +246,9 @@ const Todo: FC = () => {
         </div>
       ))}
       <div className="flex justify-between mt-4">
-        <Upload customRequest={handleUpload} accept=".xlsx,.xlsm">
-          <CustomButton type="default">インポート</CustomButton>
-        </Upload>
+      <Upload customRequest={handleUpload} accept=".xlsx,.xlsm" fileList={[]}>
+  <CustomButton type="default">インポート</CustomButton>
+</Upload>
         <CustomButton type="primary" onClick={showExportModal} disabled={todos.length === 0}>エクスポート</CustomButton>
       </div>
       <CustomModal title={editIndex !== null ? "編集" : "新規追加"} open={isModalOpen} onOk={handleSubmit} onCancel={handleCancel} okButtonProps={{ disabled: !value.trim() }} okText="承認"
