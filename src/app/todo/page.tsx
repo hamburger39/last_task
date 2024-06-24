@@ -10,6 +10,7 @@ import CustomModal from '../components/CustomModal';
 import CustomInput from '../components/CustomInput';
 import CustomTextArea from '../components/CustomTextArea';
 import { validateExcelFormat, TodoItem } from '../../utils/validateExcelFormat';
+import { title } from 'process';
 
 const { Option } = Select;
 
@@ -251,7 +252,7 @@ const Todo: FC = () => {
         </Upload>
         <CustomButton type="primary" onClick={showExportModal} disabled={todos.length === 0}>エクスポート</CustomButton>
       </div>
-      <CustomModal title="新規追加" open={isModalOpen} onOk={handleSubmit} onCancel={handleCancel} okButtonProps={{ disabled: !value.trim() }}>
+      <CustomModal title="編集" open={isModalOpen} onOk={handleSubmit} onCancel={handleCancel} okButtonProps={{ disabled: !value.trim() }}>
         <CustomInput value={value} onChange={(e) => setValue(e.target.value)} placeholder="タイトル" />
         <CustomTextArea value={detail} onChange={(e) => setDetail(e.target.value)} placeholder="詳細" />
         <DatePicker
