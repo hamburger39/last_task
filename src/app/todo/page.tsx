@@ -134,7 +134,7 @@ const Todo: FC = () => {
     XLSX.utils.book_append_sheet(wb, ws, 'Todos');
     const exportFileName = fileName + '.xlsx';
     XLSX.writeFile(wb, exportFileName);
-    setFileName('');  // Reset file name after export
+    setFileName('');
     setIsExportModalOpen(false);
   };
 
@@ -246,7 +246,7 @@ const Todo: FC = () => {
         </div>
       ))}
       <div className="flex justify-between mt-4">
-        <Upload customRequest={handleUpload} accept=".xlsx,.xlsm">
+        <Upload customRequest={handleUpload} accept=".xlsx,.xlsm" fileList={[]}>
           <CustomButton type="default">インポート</CustomButton>
         </Upload>
         <CustomButton type="primary" onClick={showExportModal} disabled={todos.length === 0}>エクスポート</CustomButton>
@@ -279,7 +279,7 @@ const Todo: FC = () => {
       </Modal>
     </div>
   );
-  
+
 };
 
 export default Todo;
