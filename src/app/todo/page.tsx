@@ -219,21 +219,21 @@ const Todo: FC = () => {
   };
 
   return (
-    <div className="px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
-        <div className="flex">
-          <CustomButton type="primary" onClick={showModal} className="mr-2">新規追加</CustomButton>
-          <CustomButton type="default" danger onClick={showDeleteAllModal} disabled={todos.length === 0} className='mr-2'>全削除</CustomButton>
-        </div>
-        <Select value={sortType} onChange={handleSortChange} className="w-1/2">
+    <div className="p-4 max-w-md mx-auto">
+      <div className="flex mb-4 space-x-4">
+        <CustomButton type="primary" onClick={showModal}>新規追加</CustomButton>
+        <CustomButton type="default" danger onClick={showDeleteAllModal} disabled={todos.length === 0}>全削除</CustomButton>
+      </div>
+      <div className="flex mb-4 space-x-4">
+        <Select defaultValue="priorityAsc" onChange={handleSortChange} className="w-full">
           <Option value="priorityAsc">優先度 昇順</Option>
           <Option value="priorityDesc">優先度 降順</Option>
-          <Option value="createdAtAsc">作成日時 昇順</Option>
-          <Option value="createdAtDesc">作成日時 降順</Option>
+          <Option value="createdAtAsc">作成日 昇順</Option>
+          <Option value="createdAtDesc">作成日 降順</Option>
         </Select>
       </div>
       {sortedTodos.map((todo, index) => (
-        <div className="bg-white p-4 rounded shadow mb-4" key={index}>
+        <div className="flex flex-col border rounded-xl border-dominant shadow p-4 mb-4" key={index}>
           <p className="text-sm font-bold">{todo.value}</p>
           <p className="text-xs">{todo.detail}</p>
           <p className="text-xs">{todo.reminderTime ? toJST(todo.reminderTime) : ''}</p>
@@ -246,34 +246,30 @@ const Todo: FC = () => {
         </div>
       ))}
       <div className="flex justify-between mt-4">
-        <Upload customRequest={handleUpload} accept=".xlsx,.xlsm" fileList={[]}>
-          <CustomButton type="default" >インポート</CustomButton>
+        <Upload customRequest={handleUpload} accept=".xlsx,.xlsm">
+          <CustomButton type="default">インポート</CustomButton>
         </Upload>
         <CustomButton type="primary" onClick={showExportModal} disabled={todos.length === 0}>エクスポート</CustomButton>
       </div>
-      <CustomModal title={editIndex !== null ? "編集" : "新規追加"} open={isModalOpen} onOk={handleSubmit} onCancel={handleCancel} okButtonProps={{ disabled: !value.trim() }} okText="承認"
-        cancelText="キャンセル">
-        <CustomInput className="mb-4" value={value} onChange={(e) => setValue(e.target.value)} placeholder="タイトル" />
-        <CustomTextArea className="mb-4" value={detail} onChange={(e) => setDetail(e.target.value)} placeholder="詳細" />
+      <CustomModal title="新規追加" open={isModalOpen} onOk={handleSubmit} onCancel={handleCancel} okButtonProps={{ disabled: !value.trim() }}>
+        <CustomInput value={value} onChange={(e) => setValue(e.target.value)} placeholder="タイトル" />
+        <CustomTextArea value={detail} onChange={(e) => setDetail(e.target.value)} placeholder="詳細" />
         <DatePicker
           showTime
           value={reminderTime ? moment(reminderTime) : null}
           onChange={(date) => setReminderTime(date ? date.toISOString() : undefined)}
           placeholder="リマインダーの時間"
-          className="w-full mb-4"
         />
-        <Select value={priority} onChange={(value) => setPriority(value as PriorityOrder)} className="w-full mb-4">
+        <Select value={priority} onChange={(value) => setPriority(value as PriorityOrder)} className="w-full">
           <Option value="高">高</Option>
           <Option value="中">中</Option>
           <Option value="低">低</Option>
         </Select>
       </CustomModal>
-      <CustomModal title="全削除の確認" open={isDeleteAllModalOpen} onOk={handleDeleteAll} onCancel={handleCancelDeleteAll} okText="承認"
-        cancelText="キャンセル">
+      <CustomModal title="全削除の確認" open={isDeleteAllModalOpen} onOk={handleDeleteAll} onCancel={handleCancelDeleteAll}>
         <p>本当に全てのTODOを削除しますか？</p>
       </CustomModal>
-      <Modal title="エクスポートファイル名の入力" open={isExportModalOpen} onOk={handleExport} onCancel={() => setIsExportModalOpen(false)} okText="承認"
-        cancelText="キャンセル">
+      <Modal title="エクスポートファイル名の入力" open={isExportModalOpen} onOk={handleExport} onCancel={() => setIsExportModalOpen(false)}>
         <AntInput value={fileName} onChange={(e) => setFileName(e.target.value)} placeholder="ファイル名を入力" />
       </Modal>
     </div>
