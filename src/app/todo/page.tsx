@@ -35,16 +35,18 @@ const Todo: FC = () => {
   const [sortType, setSortType] = useState<SortType>('priorityAsc');
   const [fileName, setFileName] = useState<string>('');
 
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+
   useEffect(() => {
     const todoList = JSON.parse(localStorage.getItem('todos') || '[]') as TodoItem[];
     setTodos(todoList);
   }, []);
 
   useEffect(() => {
-    if (Notification.permission !== 'granted') {
+    if (!isIOS && Notification.permission !== 'granted') {
       Notification.requestPermission();
     }
-  }, []);
+  }, [isIOS]);
 
   const handleSubmit = () => {
     if (!value.trim()) {
@@ -232,49 +234,83 @@ const Todo: FC = () => {
           <Option value="createdAtDesc">作成日 降順</Option>
         </Select>
       </div>
-      {sortedTodos.map((todo, index) => (
-        <div className="flex flex-col border rounded-xl border-dominant shadow p-4 mb-4" key={index}>
-          <p className="text-sm font-bold">{todo.value}</p>
-          <p className="text-xs">{todo.detail}</p>
-          <p className="text-xs">{todo.reminderTime ? toJST(todo.reminderTime) : ''}</p>
-          <p className="text-xs text-gray-400">{toJST(todo.createdAt)}</p>
-          <p className="text-xs text-gray-500">{todo.priority}</p>
-          <div className="flex justify-end space-x-2 mt-2">
-            <CustomButton type="primary" onClick={() => handleEdit(index)}>編集</CustomButton>
-            <CustomButton type="default" danger onClick={() => handleDelete(index)}>削除</CustomButton>
+      <div className="mb-4 space-y-4">
+        {sortedTodos.map((todo, index) => (
+          <div key={index} className="p-4 border rounded shadow-md bg-white flex justify-between items-center">
+            <div>
+              <div className="font-bold text-lg">{todo.value}</div>
+              <div>{todo.detail}</div>
+              {todo.reminderTime && (
+                <div className="text-blue-500">{moment(todo.reminderTime).format('YYYY-MM-DD HH:mm')}</div>
+              )}
+              <div>優先度: {todo.priority}</div>
+              <div>作成日: {toJST(todo.createdAt)}</div>
+            </div>
+            <div className="space-x-2">
+              <CustomButton type="primary" onClick={() => handleEdit(index)}>編集</CustomButton>
+              <CustomButton type="default" danger onClick={() => handleDelete(index)}>削除</CustomButton>
+            </div>
           </div>
-        </div>
-      ))}
-      <div className="flex justify-between mt-4">
-        <Upload customRequest={handleUpload} accept=".xlsx,.xlsm">
+        ))}
+      </div>
+      <div className="flex mb-4 space-x-4">
+        <Upload customRequest={handleUpload} showUploadList={false}>
           <CustomButton type="default">インポート</CustomButton>
         </Upload>
-        <CustomButton type="primary" onClick={showExportModal} disabled={todos.length === 0}>エクスポート</CustomButton>
+        <CustomButton type="default" onClick={showExportModal} disabled={todos.length === 0}>エクスポート</CustomButton>
       </div>
-      <CustomModal title="新規追加" open={isModalOpen} onOk={handleSubmit} onCancel={handleCancel} okButtonProps={{ disabled: !value.trim() }}>
-        <CustomInput value={value} onChange={(e) => setValue(e.target.value)} placeholder="タイトル" />
-        <CustomTextArea value={detail} onChange={(e) => setDetail(e.target.value)} placeholder="詳細" />
+
+      <CustomModal
+        isOpen={isModalOpen}
+        handleCancel={handleCancel}
+        title={editIndex !== null ? 'Edit' : '新規追加'}
+        handleOk={handleSubmit}
+      >
+        <CustomInput id="todo-title" name="todo-title" label="タイトル" value={value} onChange={(e) => setValue(e.target.value)} />
+        <CustomTextArea id="todo-detail" name="todo-detail" label="詳細" value={detail} onChange={(e) => setDetail(e.target.value)} />
+
         <DatePicker
           showTime
+          format="YYYY-MM-DD HH:mm"
+          placeholder="リマインダーを設定する"
           value={reminderTime ? moment(reminderTime) : null}
-          onChange={(date) => setReminderTime(date ? date.toISOString() : undefined)}
-          placeholder="リマインダーの時間"
+          onChange={(value) => setReminderTime(value ? value.toISOString() : undefined)}
+          className="w-full"
         />
-        <Select value={priority} onChange={(value) => setPriority(value as PriorityOrder)} className="w-full">
+        <Select value={priority} onChange={(value) => setPriority(value)} className="w-full">
           <Option value="高">高</Option>
           <Option value="中">中</Option>
           <Option value="低">低</Option>
         </Select>
       </CustomModal>
-      <CustomModal title="全削除の確認" open={isDeleteAllModalOpen} onOk={handleDeleteAll} onCancel={handleCancelDeleteAll}>
-        <p>本当に全てのTODOを削除しますか？</p>
-      </CustomModal>
-      <Modal title="エクスポートファイル名の入力" open={isExportModalOpen} onOk={handleExport} onCancel={() => setIsExportModalOpen(false)}>
-        <AntInput value={fileName} onChange={(e) => setFileName(e.target.value)} placeholder="ファイル名を入力" />
+
+      <Modal
+        open={isDeleteAllModalOpen}
+        onCancel={handleCancelDeleteAll}
+        onOk={handleDeleteAll}
+        title="全削除の確認"
+        okText="全削除"
+        cancelText="キャンセル"
+      >
+        <p>すべてのTODOを削除しますか？</p>
+      </Modal>
+
+      <Modal
+        open={isExportModalOpen}
+        onCancel={() => setIsExportModalOpen(false)}
+        onOk={handleExport}
+        title="エクスポート"
+        okText="エクスポート"
+        cancelText="キャンセル"
+      >
+        <AntInput
+          value={fileName}
+          onChange={(e) => setFileName(e.target.value)}
+          placeholder="ファイル名を入力"
+        />
       </Modal>
     </div>
   );
-
 };
 
 export default Todo;
