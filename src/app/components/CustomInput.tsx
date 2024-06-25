@@ -1,21 +1,20 @@
-import React, { FC } from 'react';
+import React, { FC, ChangeEvent } from 'react';
 import { Input } from 'antd';
 
 interface CustomInputProps {
-  placeholder?: string;
+  label: string;
   value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  required?: boolean;
-  className?: string;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  id?: string;
+  name?: string;
 }
 
-const CustomInput: FC<CustomInputProps> = ({ placeholder, value, onChange, required = false, className }) => {
-  return (
-    <Input placeholder={placeholder} value={value} onChange={onChange} required={required} className={className} />
-  );
-};
+const CustomInput: FC<CustomInputProps> = ({ label, value, onChange, id, name }) => (
+  <div>
+    <label htmlFor={id}>{label}</label>
+    <Input id={id} name={name} value={value} onChange={onChange} />
+  </div>
+);
 
 export default CustomInput;
-
-
 

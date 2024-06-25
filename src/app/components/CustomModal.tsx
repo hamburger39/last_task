@@ -1,15 +1,19 @@
-import React from 'react';
-import { Modal, ModalProps } from 'antd';
+import React, { FC, ReactNode } from 'react';
+import { Modal } from 'antd';
 
-interface CustomModalProps extends ModalProps {}
+interface CustomModalProps {
+  isOpen: boolean;
+  handleCancel: () => void;
+  title: string;
+  handleOk: () => void;
+  children: ReactNode;
+}
 
-const CustomModal: React.FC<CustomModalProps> = ({ children, ...props }) => {
-  return (
-    <Modal {...props} style={{ ...props.style, padding: '16px' }}>
-      {children}
-    </Modal>
-  );
-};
+const CustomModal: FC<CustomModalProps> = ({ isOpen, handleCancel, title, handleOk, children }) => (
+  <Modal open={isOpen} onCancel={handleCancel} onOk={handleOk} title={title}>
+    {children}
+  </Modal>
+);
 
 export default CustomModal;
 
