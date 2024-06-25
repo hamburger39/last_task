@@ -43,8 +43,14 @@ const Todo: FC = () => {
   }, []);
 
   useEffect(() => {
-    if (!isIOS && Notification.permission !== 'granted') {
-      Notification.requestPermission();
+    if (isIOS && Notification.permission !== 'denied') {
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+          console.log('Notifications enabled');
+        } else if (permission === 'denied') {
+          console.log('Notifications denied by user');
+        }
+      });
     }
   }, [isIOS]);
 
