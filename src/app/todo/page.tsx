@@ -35,24 +35,11 @@ const Todo: FC = () => {
   const [sortType, setSortType] = useState<SortType>('priorityAsc');
   const [fileName, setFileName] = useState<string>('');
 
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
 
   useEffect(() => {
     const todoList = JSON.parse(localStorage.getItem('todos') || '[]') as TodoItem[];
     setTodos(todoList);
   }, []);
-
-  useEffect(() => {
-    if (isIOS && Notification.permission !== 'denied') {
-      Notification.requestPermission().then(permission => {
-        if (permission === 'granted') {
-          console.log('Notifications enabled');
-        } else if (permission === 'denied') {
-          console.log('Notifications denied by user');
-        }
-      });
-    }
-  }, [isIOS]);
 
   const handleSubmit = () => {
     if (!value.trim()) {
@@ -269,8 +256,10 @@ const Todo: FC = () => {
       <CustomModal
         isOpen={isModalOpen}
         handleCancel={handleCancel}
-        title={editIndex !== null ? 'Edit' : '新規追加'}
+        title={editIndex !== null ? '編集' : '新規追加'}
         handleOk={handleSubmit}
+        okText="承認"
+        cancelText="キャンセル"
       >
         <CustomInput id="todo-title" name="todo-title" label="タイトル" value={value} onChange={(e) => setValue(e.target.value)} />
         <CustomTextArea id="todo-detail" name="todo-detail" label="詳細" value={detail} onChange={(e) => setDetail(e.target.value)} />
@@ -281,9 +270,9 @@ const Todo: FC = () => {
           placeholder="リマインダーを設定する"
           value={reminderTime ? moment(reminderTime) : null}
           onChange={(value) => setReminderTime(value ? value.toISOString() : undefined)}
-          className="w-full"
+          className="mt-4 w-full"
         />
-        <Select value={priority} onChange={(value) => setPriority(value)} className="w-full">
+        <Select value={priority} onChange={(value) => setPriority(value)} className="mt-4 w-full">
           <Option value="高">高</Option>
           <Option value="中">中</Option>
           <Option value="低">低</Option>
